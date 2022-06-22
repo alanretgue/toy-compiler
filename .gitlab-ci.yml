@@ -5,7 +5,7 @@ stages:
 
 rust-latest:
   stage: test
-  before-script:
+  before_script:
     - cargo build --verbose
   script:
     - cargo test --verbose
