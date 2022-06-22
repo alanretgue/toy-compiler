@@ -1,0 +1,11 @@
+image: rust:latest
+
+stages:
+  - test
+
+rust-latest:
+  stage: test
+  before-script:
+    - cargo build --verbose
+  script:
+    - cargo test --verbose
