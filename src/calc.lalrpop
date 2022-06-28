@@ -2,9 +2,23 @@ use std::str::FromStr;
 
 grammar;
 
-pub Term: i32 = {
-    <n:Num> => n,
-    "(" <t:Term> ")" => t,
+pub Expr: i32 = {
+    <l:Expr> "+" <r:Factor> => l + r,
+    <l:Expr> "-" <r:Factor> => l - r,
+    <id:ID> "=" <r:Factor> => r,
+    Factor,
+};
+
+Factor: i32 = {
+    <l:Factor> "*" <r:Term> => l * r,
+    <l:Factor> "/" <r:Term> => l / r,
+    Term,
+};
+
+Term: i32 = {
+    Num,
+    "(" <Expr> ")",
 };
 
 Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
+ID: String = <s:r"[A-Z][_a-zA-Z]*"> => String::from_str(s).unwrap();
