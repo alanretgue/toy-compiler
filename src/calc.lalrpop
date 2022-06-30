@@ -1,23 +1,37 @@
 use std::str::FromStr;
+use std::vec::Vec;
+use crate::ast::{Expr, Opcode, Params};
 
 grammar;
 
-pub Expr: i32 = {
-    <l:Expr> "+" <r:Factor> => l + r,
-    <l:Expr> "-" <r:Factor> => l - r,
-    <id:ID> "=" <r:Factor> => r,
-    Factor,
+pub Stat: Box<Expr> = {
+    <id:ID> "=" <e:Expr> => Box::new(Expr::Assign(Box::new(id), e)),
+    <e:Expr> => e,
 };
 
-Factor: i32 = {
-    <l:Factor> "*" <r:Term> => l * r,
-    <l:Factor> "/" <r:Term> => l / r,
+Expr: Box<Expr> = {
+    <e:Expr> <eo:ExprOp> <f:Term> => Box::new(Expr::Op(e, eo, f)),
+    "(" <id:ID> <e:Params> ")" => Box::new(Expr::App(Box::new(id), *e)),
     Term,
 };
 
-Term: i32 = {
-    Num,
-    "(" <Expr> ")",
+Params: Box<Params> = {
+    <e:Expr> <p:Params> => { (*p).params.push(e); p },
+    // <e:Expr> => Params { params: List::new() },
+    => Box::new(Params { params: Vec::new() }),
+
+}
+
+Term: Box<Expr> = {
+    <n:Num> => Box::new(Expr::Number(n)),
+    "(" <e:Expr> ")" => e,
+};
+
+ExprOp: Opcode = {
+    "+" => Opcode::Add,
+    "-" => Opcode::Sub,
+    "*" => Opcode::Mul,
+    "/" => Opcode::Div,
 };
 
 Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
