@@ -5,8 +5,8 @@ mod ast;
 lalrpop_mod!(pub calc); // synthesized by LALRPOP
 
 fn main() {
-    let expr = calc::StatParser::new().parse("A = 2 + 2 * 4").unwrap();
-    println!("{:?}", expr);
+    let expr = launch_pretty_print("A = (A 1 2 3)");
+    println!("{}", expr);
 }
 
 #[test]
@@ -22,13 +22,19 @@ fn calc() {
     // assert!(calc::ExprParser::new().parse("A = 2").is_ok());
 }
 
+fn launch_pretty_print(str: &str) -> String {
+    format!("{:?}", calc::StatParser::new().parse(str).unwrap())
+}
+
 #[test]
 fn pretty_print() {
-    assert!(format!("{:?}", calc::StatParser::new().parse("(9+1)").unwrap()) == "(9 + 1)");
-    assert!(format!("{:?}", calc::StatParser::new().parse("2   *    4").unwrap()) == "(2 * 4)");
-    assert!(format!("{:?}", calc::StatParser::new().parse("A = ((4 / 2))").unwrap()) == "A = (4 / 2)");
-    assert!(format!("{:?}", calc::StatParser::new().parse("ABC = ((4 / 2) * 23)").unwrap()) == "ABC = ((4 / 2) * 23)");
-    assert!(format!("{:?}", calc::StatParser::new().parse("ABC = (4 / (2 * 23))").unwrap()) == "ABC = (4 / (2 * 23))");
-    assert!(format!("{:?}", calc::StatParser::new().parse("(A 1)").unwrap()) == "(A 1)");
-    assert!(format!("{:?}", calc::StatParser::new().parse("ABC = (A 1)").unwrap()) == "ABC = (A 1)");
+    assert!(launch_pretty_print("(9+1)") == "(9 + 1)");
+    assert!(launch_pretty_print("2   *    4") == "(2 * 4)");
+    assert!(launch_pretty_print("A = ((4 / 2))") == "A = (4 / 2)");
+    assert!(launch_pretty_print("ABC = ((4 / 2) * 23)") == "ABC = ((4 / 2) * 23)");
+    assert!(launch_pretty_print("ABC = (4 / (2 * 23))") == "ABC = (4 / (2 * 23))");
+    assert!(launch_pretty_print("(A 1)") == "(A 1)");
+    assert!(launch_pretty_print("ABC = (A 1)") == "ABC = (A 1)");
+    assert!(launch_pretty_print("ABC = (A 1 2 3 2 1)") == "ABC = (A 1 2 3 2 1)");
+    assert!(launch_pretty_print("ABC = 2 + 1 * 4") == "ABC = (2 + (1 * 4))");
 }

@@ -10,16 +10,25 @@ pub Stat: Box<Expr> = {
 };
 
 Expr: Box<Expr> = {
-    <e:Expr> <eo:ExprOp> <f:Term> => Box::new(Expr::Op(e, eo, f)),
+    <e:Expr> <eo:ExprOp> <f:Fact> => Box::new(Expr::Op(e, eo, f)),
     "(" <id:ID> <e:Params> ")" => Box::new(Expr::App(Box::new(id), *e)),
+    "(" "f(" <e:Args> ")" ")" => Box::new(Expr::Decl(*e)),
+    Fact,
+};
+
+Fact: Box<Expr> = {
+    <e:Fact> <eo:FactOp> <f:Term> => Box::new(Expr::Op(e, eo, f)),
     Term,
 };
 
 Params: Box<Params> = {
-    <e:Expr> <mut p:Params> => { (*p).params.push(e); p },
-    // <e:Expr> => Params { params: List::new(e) },
+    <mut p:Params> <e:Expr> => { (*p).params.push(e); p },
     => Box::new(Params { params: Vec::new() }),
+}
 
+Args: Box<Params> = {
+    <mut p:Args> <e:Expr> => { (*p).params.push(e); p },
+    => Box::new(Params { params: Vec::new() }),
 }
 
 Term: Box<Expr> = {
@@ -30,6 +39,9 @@ Term: Box<Expr> = {
 ExprOp: Opcode = {
     "+" => Opcode::Add,
     "-" => Opcode::Sub,
+};
+
+FactOp: Opcode = {
     "*" => Opcode::Mul,
     "/" => Opcode::Div,
 };

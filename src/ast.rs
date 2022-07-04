@@ -10,6 +10,7 @@ pub enum Expr {
     Op(Box<Expr>, Opcode, Box<Expr>),
     Assign(Box<String>, Box<Expr>),
     App(Box<String>, Params),
+    Decl(Params),
 }
 
 pub enum Opcode {
@@ -25,7 +26,8 @@ impl fmt::Debug for Expr {
         Expr::Number(n) => write!(f, "{}", n),
         Expr::Op(first_op, opcode, sec_op) => write!(f, "({:?} {:?} {:?})", first_op, opcode, sec_op),
         Expr::Assign(name, func) => write!(f, "{} = {:?}", *name, func),
-        Expr::App(name, param) => write!(f, "({} {:?})", *name, param),
+        Expr::App(name, param) => write!(f, "({}{:?})", *name, param),
+        Expr::Decl(param) => write!(f, "(f({:?}))", param),
         }
     }
 }
@@ -44,7 +46,7 @@ impl fmt::Debug for Opcode {
 impl fmt::Debug for Params {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for param in &self.params {
-            write!(f, "{:?}", param);
+            write!(f, " {:?}", param)?;
         }
         Ok(())
     }
