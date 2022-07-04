@@ -16,8 +16,8 @@ Expr: Box<Expr> = {
 };
 
 Params: Box<Params> = {
-    <e:Expr> <p:Params> => { (*p).params.push(e); p },
-    // <e:Expr> => Params { params: List::new() },
+    <e:Expr> <mut p:Params> => { (*p).params.push(e); p },
+    // <e:Expr> => Params { params: List::new(e) },
     => Box::new(Params { params: Vec::new() }),
 
 }

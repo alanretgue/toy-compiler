@@ -5,7 +5,7 @@ mod ast;
 lalrpop_mod!(pub calc); // synthesized by LALRPOP
 
 fn main() {
-    let expr = calc::StatParser::new().parse("A = 2 * 4").unwrap();
+    let expr = calc::StatParser::new().parse("A = 2 + 2 * 4").unwrap();
     println!("{:?}", expr);
 }
 
