@@ -1,15 +1,28 @@
 use std::fmt;
 use std::vec::Vec;
 
+pub struct ID {
+    pub name: String,
+}
+
 pub struct Params {
     pub params: Vec<Box<Expr>>,
+}
+
+pub struct Args {
+    pub args: Vec<ID>,
+}
+
+pub enum Func {
+    ID(ID),
+    Decl(Args, Box<Expr>),
 }
 
 pub enum Expr {
     Number(i32),
     Op(Box<Expr>, Opcode, Box<Expr>),
-    Assign(Box<String>, Box<Expr>),
-    App(Box<String>, Params),
+    Assign(ID, Box<Expr>),
+    App(Box<Func>, Params),
 }
 
 pub enum Opcode {
@@ -24,8 +37,17 @@ impl fmt::Debug for Expr {
         match self {
         Expr::Number(n) => write!(f, "{}", n),
         Expr::Op(first_op, opcode, sec_op) => write!(f, "({:?} {:?} {:?})", first_op, opcode, sec_op),
-        Expr::Assign(name, func) => write!(f, "{} = {:?}", *name, func),
-        Expr::App(name, param) => write!(f, "({} {:?})", *name, param),
+        Expr::Assign(name, func) => write!(f, "{:?} = {:?}", *name, func),
+        Expr::App(name, param) => write!(f, "({:?}{:?})", *name, param),
+        }
+    }
+}
+
+impl fmt::Debug for Func {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+        Func::ID(id) => write!(f, "{:?}", id),
+        Func::Decl(args, e) => write!(f, "(({:?}) => {:?})", args, *e),
         }
     }
 }
@@ -44,7 +66,22 @@ impl fmt::Debug for Opcode {
 impl fmt::Debug for Params {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for param in &self.params {
-            write!(f, "{:?}", param);
+            write!(f, " {:?}", param)?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Debug for ID {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, " {}", self.name)
+    }
+}
+
+impl fmt::Debug for Args {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for arg in &self.args {
+            write!(f, " {:?}", arg)?;
         }
         Ok(())
     }

@@ -1,26 +1,34 @@
 use std::str::FromStr;
 use std::vec::Vec;
-use crate::ast::{Expr, Opcode, Params};
+use crate::ast::{Expr, Opcode, Params, Args, ID, Func};
 
 grammar;
 
 pub Stat: Box<Expr> = {
-    <id:ID> "=" <e:Expr> => Box::new(Expr::Assign(Box::new(id), e)),
+    <id:ID> "=" <e:Expr> => Box::new(Expr::Assign(ID { name: id}, e)),
     <e:Expr> => e,
 };
 
 Expr: Box<Expr> = {
     <e:Expr> <eo:ExprOp> <f:Term> => Box::new(Expr::Op(e, eo, f)),
-    "(" <id:ID> <e:Params> ")" => Box::new(Expr::App(Box::new(id), *e)),
+    "(" <id:Func> <p:Params> ")" => Box::new(Expr::App(id, *p)),
     Term,
+};
+
+Func: Box<Func> = {
+    <id:ID> => Box::new(Func::ID(ID { name: id })),
+    "(" "(" <args:Args> ")" "=>" <e:Expr> ")" => Box::new(Func::Decl(*args, e)),
 };
 
 Params: Box<Params> = {
     <e:Expr> <mut p:Params> => { (*p).params.push(e); p },
-    // <e:Expr> => Params { params: List::new(e) },
     => Box::new(Params { params: Vec::new() }),
+};
 
-}
+Args: Box<Args> = {
+    <id:ID> "," <mut p:Args> => { (*p).args.push(ID { name: id }); p },
+    => Box::new(Args { args: Vec::new() }),
+};
 
 Term: Box<Expr> = {
     <n:Num> => Box::new(Expr::Number(n)),
