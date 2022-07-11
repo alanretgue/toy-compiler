@@ -1,6 +1,8 @@
 #[macro_use] extern crate lalrpop_util;
 #[path = "ast.rs"]
 mod ast;
+#[path = "pretty_print.rs"]
+mod pretty_print;
 
 lalrpop_mod!(pub calc); // synthesized by LALRPOP
 
