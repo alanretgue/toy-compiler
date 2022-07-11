@@ -23,7 +23,7 @@ Fact: Box<Expr> = {
 
 Func: Box<Func> = {
     <id:ID> => Box::new(Func::ID(ID { name: id })),
-    "func(" "(" <args:Args> ")" "=>" <e:Expr> ")" => Box::new(Func::Decl(*args, e)),
+    "(f" "(" <args:Args> ")" "=>" <e:Expr> ")" => Box::new(Func::Decl(*args, e)),
 };
 
 Params: Box<Params> = {
@@ -32,8 +32,8 @@ Params: Box<Params> = {
 };
 
 Args: Box<Args> = {
-    <id:ID> "," <mut p:Args> => { (*p).args.push(ID { name: id }); p },
-    <id:ID> => Box::new(Args { args: vec![ID { name: id }] }),
+    <id:Var> "," <mut p:Args> => { (*p).args.push(ID { name: id }); p },
+    <id:Var> => Box::new(Args { args: vec![ID { name: id }] }),
 };
 
 Term: Box<Expr> = {
@@ -53,3 +53,4 @@ FactOp: Opcode = {
 
 Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
 ID: String = <s:r"[A-Z][_a-zA-Z]*"> => String::from_str(s).unwrap();
+Var: String = <s:r"[a-z][_a-z]*"> => String::from_str(s).unwrap();

@@ -5,13 +5,14 @@ mod ast;
 lalrpop_mod!(pub calc); // synthesized by LALRPOP
 
 fn main() {
-    let expr = launch_pretty_print("((A) => (1 + 1))");
+    let expr = launch_pretty_print("(f(A) => (1 + 1))");
     println!("{}", expr);
 }
 
 #[test]
 fn calc() {
     assert!(calc::StatParser::new().parse("A = 12").is_ok());
+    assert!(calc::StatParser::new().parse("A = B").is_ok());
     assert!(calc::StatParser::new().parse("22").is_ok());
     assert!(calc::StatParser::new().parse("(22)").is_ok());
     assert!(calc::StatParser::new().parse("(2+2)").is_ok());
@@ -19,6 +20,8 @@ fn calc() {
     assert!(calc::StatParser::new().parse("((((22))))").is_ok());
     assert!(calc::StatParser::new().parse("((22)").is_err());
     assert!(calc::StatParser::new().parse("((2+2)").is_err());
+    assert!(calc::StatParser::new().parse("A = B = (2+2)").is_err());
+    assert!(calc::StatParser::new().parse("A = (A 1) = (2+2)").is_err());
     // assert!(calc::ExprParser::new().parse("A = 2").is_ok());
 }
 
@@ -37,5 +40,5 @@ fn pretty_print() {
     assert_eq!(launch_pretty_print("ABC = (A 1)"), "ABC = (A 1)");
     assert_eq!(launch_pretty_print("ABC = (A 1 2 3 2 1)"), "ABC = (A 1 2 3 2 1)");
     assert_eq!(launch_pretty_print("ABC = 2 + 1 * 4"), "ABC = (2 + (1 * 4))");
-    //assert_eq!(launch_pretty_print("ABC = ((a) => 1 + 1)"), "ABC = ((a) => (1 + 1))");
+    assert_eq!(launch_pretty_print("ABC = (f(a) => 1 + 1)"), "ABC = (f(a) => (1 + 1))");
 }

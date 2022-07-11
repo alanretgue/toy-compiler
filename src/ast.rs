@@ -49,7 +49,7 @@ impl fmt::Debug for Func {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
         Func::ID(id) => write!(f, "{:?}", id),
-        Func::Decl(args, e) => write!(f, "(({:?}) => {:?})", args, *e),
+        Func::Decl(args, e) => write!(f, "(f({:?}) => {:?})", args, *e),
         }
     }
 }
@@ -82,8 +82,9 @@ impl fmt::Debug for ID {
 
 impl fmt::Debug for Args {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for arg in &self.args {
-            write!(f, " {:?}", arg)?;
+        write!(f, "{:?}", self.args[0])?;
+        for i in 1..self.args.len() {
+            write!(f, "{:?}", &self.args[i])?;
         }
         Ok(())
     }
