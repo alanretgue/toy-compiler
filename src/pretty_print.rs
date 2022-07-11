@@ -1,5 +1,4 @@
 use std::fmt;
-use std::vec::Vec;
 
 use crate::ast::*;
 
@@ -11,6 +10,7 @@ impl fmt::Debug for Expr {
         Expr::Assign(name, func) => write!(f, "{:?} = {:?}", *name, func),
         Expr::App(name, param) => write!(f, "({:?}{:?})", *name, param),
         Expr::Func(func) => write!(f, "{:?}", *func),
+        Expr::ID(id) => write!(f, "{:?}", id),
         }
     }
 }
@@ -54,7 +54,7 @@ impl fmt::Debug for Args {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.args[0])?;
         for i in 1..self.args.len() {
-            write!(f, "{:?}", &self.args[i])?;
+            write!(f, ", {:?}", &self.args[i])?;
         }
         Ok(())
     }

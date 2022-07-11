@@ -1,4 +1,3 @@
-use std::fmt;
 use std::vec::Vec;
 
 pub struct ID {
@@ -24,6 +23,7 @@ pub enum Expr {
     Assign(ID, Box<Expr>),
     App(Box<Func>, Params),
     Func(Box<Func>),
+    ID(ID),
 }
 
 pub enum Opcode {

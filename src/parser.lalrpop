@@ -1,5 +1,4 @@
 use std::str::FromStr;
-use std::vec::Vec;
 use crate::ast::{Expr, Opcode, Params, Args, ID, Func};
 
 grammar;
@@ -27,17 +26,18 @@ Func: Box<Func> = {
 };
 
 Params: Box<Params> = {
-    <e:Expr> <mut p:Params> => { (*p).params.push(e); p },
+    <mut p:Params> <e:Expr> => { (*p).params.push(e); p },
     <e:Expr> => Box::new(Params { params: vec![e] }),
 };
 
 Args: Box<Args> = {
-    <id:Var> "," <mut p:Args> => { (*p).args.push(ID { name: id }); p },
+    <mut p:Args> "," <id:Var>  => { (*p).args.push(ID { name: id }); p },
     <id:Var> => Box::new(Args { args: vec![ID { name: id }] }),
 };
 
 Term: Box<Expr> = {
     <n:Num> => Box::new(Expr::Number(n)),
+    <var:Var> => Box::new(Expr::ID(ID { name: var })),
     "(" <e:Expr> ")" => e,
 };
 
