@@ -11,6 +11,7 @@ impl fmt::Debug for Expr {
         Expr::App(name, param) => write!(f, "({:?}{:?})", *name, param),
         Expr::Func(func) => write!(f, "{:?}", *func),
         Expr::ID(id) => write!(f, "{:?}", id),
+        Expr::Error(err) => write!(f, "{:?}", *err),
         }
     }
 }
@@ -20,6 +21,7 @@ impl fmt::Debug for Func {
         match self {
         Func::ID(id) => write!(f, "{:?}", id),
         Func::Decl(args, e) => write!(f, "(f({:?}) => {:?})", args, *e),
+        Func::Error(err) => write!(f, "{:?}", *err),
         }
     }
 }
@@ -46,7 +48,10 @@ impl fmt::Debug for Params {
 
 impl fmt::Debug for ID {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.name)
+        match self {
+        ID::Name(name) => write!(f, "{}", name),
+        ID::Error(err, name) => write!(f, "{:?}: {}", *err, name),
+        }
     }
 }
 
@@ -57,5 +62,16 @@ impl fmt::Debug for Args {
             write!(f, ", {:?}", &self.args[i])?;
         }
         Ok(())
+    }
+}
+
+impl fmt::Debug for ErrorType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+        ErrorType::Success => write!(f, "Success"),
+        ErrorType::InnerVar => write!(f, "Bad name variable"),
+        ErrorType::Outervar => write!(f, "Bad name variable"),
+        ErrorType::Unhandled => write!(f, "Unhandled Error"),
+        }
     }
 }

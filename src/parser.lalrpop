@@ -1,10 +1,12 @@
 use std::str::FromStr;
-use crate::ast::{Expr, Opcode, Params, Args, ID, Func};
+use lalrpop_util::ErrorRecovery;
 
-grammar;
+use crate::ast::*;
+
+grammar<'err>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, &'static str>>);
 
 pub Stat: Box<Expr> = {
-    <id:ID> "=" <e:Expr> => Box::new(Expr::Assign(ID { name: id}, e)),
+    <id:ID> "=" <e:Expr> => Box::new(Expr::Assign(ID::Name(id), e)),
     <e:Expr> => e,
 };
 
@@ -21,7 +23,7 @@ Fact: Box<Expr> = {
 };
 
 Func: Box<Func> = {
-    <id:ID> => Box::new(Func::ID(ID { name: id })),
+    <id:ID> => Box::new(Func::ID(ID::Name(id))),
     "(f" "(" <args:Args> ")" "=>" <e:Expr> ")" => Box::new(Func::Decl(*args, e)),
 };
 
@@ -31,14 +33,22 @@ Params: Box<Params> = {
 };
 
 Args: Box<Args> = {
-    <mut p:Args> "," <id:Var>  => { (*p).args.push(ID { name: id }); p },
-    <id:Var> => Box::new(Args { args: vec![ID { name: id }] }),
+    <mut p:Args> "," <id:Variable>  => { (*p).args.push(id); p },
+    <id:Var> => Box::new(Args { args: vec![ID::Name(id)] }),
 };
+
+Variable: ID = {
+    <var:Var> => ID::Name(var),
+    ! => { errors.push(<>);
+    ID::Error(Box::new(ErrorType::InnerVar), String::from("tmp")) },
+}
 
 Term: Box<Expr> = {
     <n:Num> => Box::new(Expr::Number(n)),
-    <var:Var> => Box::new(Expr::ID(ID { name: var })),
+    <var:Var> => Box::new(Expr::ID(ID::Name(var))),
     "(" <e:Expr> ")" => e,
+    ! => { errors.push(<>);
+    Box::new(Expr::Error(Box::new(ErrorType::Unhandled))) },
 };
 
 ExprOp: Opcode = {

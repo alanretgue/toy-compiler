@@ -1,7 +1,8 @@
 use std::vec::Vec;
 
-pub struct ID {
-    pub name: String,
+pub enum ID {
+    Name(String),
+    Error(Box<ErrorType>, String)
 }
 
 pub struct Params {
@@ -15,6 +16,7 @@ pub struct Args {
 pub enum Func {
     ID(ID),
     Decl(Args, Box<Expr>),
+    Error(Box<ErrorType>),
 }
 
 pub enum Expr {
@@ -24,6 +26,7 @@ pub enum Expr {
     App(Box<Func>, Params),
     Func(Box<Func>),
     ID(ID),
+    Error(Box<ErrorType>),
 }
 
 pub enum Opcode {
@@ -31,4 +34,12 @@ pub enum Opcode {
     Div,
     Add,
     Sub,
+}
+
+#[derive(PartialEq)]
+pub enum ErrorType {
+    Success,
+    InnerVar,
+    Outervar,
+    Unhandled,
 }

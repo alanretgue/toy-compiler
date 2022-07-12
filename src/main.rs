@@ -11,23 +11,45 @@ fn main() {
     println!("{}", expr);
 }
 
+fn _launch_parsing(str: &str, error: bool) -> bool {
+    let mut errors = Vec::new();
+    let _ = parser::StatParser::new().parse(&mut errors, str);
+
+    (error && errors.len() != 0) || errors.len() == 0
+}
+
+fn _launch_success(str: &str) -> bool {
+    _launch_parsing(str, false)
+}
+
+fn _launch_error(str: &str) -> bool {
+    _launch_parsing(str, true)
+}
+
 #[test]
-fn calc() {
-    assert!(parser::StatParser::new().parse("A = 12").is_ok());
-    assert!(parser::StatParser::new().parse("A = B").is_ok());
-    assert!(parser::StatParser::new().parse("22").is_ok());
-    assert!(parser::StatParser::new().parse("(22)").is_ok());
-    assert!(parser::StatParser::new().parse("(2+2)").is_ok());
-    assert!(parser::StatParser::new().parse("(2+2) * (2/2)").is_ok());
-    assert!(parser::StatParser::new().parse("((((22))))").is_ok());
-    assert!(parser::StatParser::new().parse("((22)").is_err());
-    assert!(parser::StatParser::new().parse("((2+2)").is_err());
-    assert!(parser::StatParser::new().parse("A = B = (2+2)").is_err());
-    assert!(parser::StatParser::new().parse("A = (A 1) = (2+2)").is_err());
+fn parse_success() {
+    assert!(_launch_success("A = 12"));
+    assert!(_launch_success("A = B"));
+    assert!(_launch_success("22"));
+    assert!(_launch_success("(22)"));
+    assert!(_launch_success("(2+2)"));
+    assert!(_launch_success("(2+2) * (2/2)"));
+    assert!(_launch_success("((((22))))"));
+    assert!(_launch_success("A = (f(a) => a)"));
+}
+
+#[test]
+fn parse_error() {
+    assert!(_launch_error("((22)"));
+    assert!(_launch_error("((2+2)"));
+    assert!(_launch_error("A = B = (2+2)"));
+    assert!(_launch_error("A = (A 1) = (2+2)"));
+    assert!(_launch_error("A = (f(A) => A)"));
 }
 
 fn launch_pretty_print(str: &str) -> String {
-    format!("{:?}", parser::StatParser::new().parse(str).unwrap())
+    let mut errors = Vec::new();
+    format!("{:?}", parser::StatParser::new().parse(&mut errors, str).unwrap())
 }
 
 #[test]
