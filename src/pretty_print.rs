@@ -7,7 +7,6 @@ impl fmt::Debug for Expr {
         match self {
         Expr::Number(n) => write!(f, "{}", n),
         Expr::Op(first_op, opcode, sec_op) => write!(f, "({:?} {:?} {:?})", first_op, opcode, sec_op),
-        Expr::Assign(name, func) => write!(f, "{:?} = {:?}", *name, func),
         Expr::App(name, param) => write!(f, "({:?}{:?})", *name, param),
         Expr::Func(func) => write!(f, "{:?}", *func),
         Expr::ID(id) => write!(f, "{:?}", id),
@@ -49,7 +48,13 @@ impl fmt::Debug for Params {
 impl fmt::Debug for ID {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-        ID::Name(name) => write!(f, "{}", name),
+        ID::Name(name, e) => {
+            if **e == Expr::Error(Box::new(ErrorType::VariableNotBinded)) {
+                write!(f, "{}", name)
+            } else {
+                write!(f, "{} = {:?}", name, *e)
+            }
+        },
         ID::Error(err, name) => write!(f, "{:?}: {}", *err, name),
         }
     }
@@ -72,6 +77,7 @@ impl fmt::Debug for ErrorType {
         ErrorType::InnerVar => write!(f, "Bad name variable"),
         ErrorType::Outervar => write!(f, "Bad name variable"),
         ErrorType::Unhandled => write!(f, "Unhandled Error"),
+        ErrorType::VariableNotBinded => write!(f, "Variable not binded"),
         }
     }
 }

@@ -6,7 +6,7 @@ use crate::ast::*;
 grammar<'err>(errors: &'err mut Vec<ErrorRecovery<usize, Token<'input>, &'static str>>);
 
 pub Stat: Box<Expr> = {
-    <id:ID> "=" <e:Expr> => Box::new(Expr::Assign(ID::Name(id), e)),
+    <id:ID> "=" <e:Expr> => Box::new(Expr::ID(ID::Name(id, e))),
     <e:Expr> => e,
 };
 
@@ -23,7 +23,7 @@ Fact: Box<Expr> = {
 };
 
 Func: Box<Func> = {
-    <id:ID> => Box::new(Func::ID(ID::Name(id))),
+    <id:ID> => Box::new(Func::ID(ID::Name(id, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))))),
     "(f" "(" <args:Args> ")" "=>" <e:Expr> ")" => Box::new(Func::Decl(*args, e)),
 };
 
@@ -34,18 +34,19 @@ Params: Box<Params> = {
 
 Args: Box<Args> = {
     <mut p:Args> "," <id:Variable>  => { (*p).args.push(id); p },
-    <id:Var> => Box::new(Args { args: vec![ID::Name(id)] }),
+    <id:Var> => Box::new(Args { args: vec![ID::Name(id, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded))))] }),
 };
 
 Variable: ID = {
-    <var:Var> => ID::Name(var),
+    <var:Var> => ID::Name(var, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))),
     ! => { errors.push(<>);
-    ID::Error(Box::new(ErrorType::InnerVar), String::from("tmp")) },
+    ID::Error(Box::new(ErrorType::InnerVar), String::from("Inner variable must
+    be lowercase")) },
 }
 
 Term: Box<Expr> = {
     <n:Num> => Box::new(Expr::Number(n)),
-    <var:Var> => Box::new(Expr::ID(ID::Name(var))),
+    <var:Var> => Box::new(Expr::ID(ID::Name(var, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))))),
     "(" <e:Expr> ")" => e,
     ! => { errors.push(<>);
     Box::new(Expr::Error(Box::new(ErrorType::Unhandled))) },
