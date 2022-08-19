@@ -18,7 +18,6 @@ Expr: Box<Expr> = {
 
 Fact: Box<Expr> = {
     <e:Fact> <eo:FactOp> <f:Term> => Box::new(Expr::Op(e, eo, f)),
-    "(" <id:Func> <p:Params> ")" => Box::new(Expr::App(id, *p)),
     Term,
 };
 
@@ -47,6 +46,7 @@ Variable: ID = {
 Term: Box<Expr> = {
     <n:Num> => Box::new(Expr::Number(n)),
     <var:Var> => Box::new(Expr::ID(ID::Name(var, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))))),
+    "(" <id:Func> <p:Params> ")" => Box::new(Expr::App(id, *p)),
     "(" <e:Expr> ")" => e,
     ! => { errors.push(<>);
     Box::new(Expr::Error(Box::new(ErrorType::Unhandled))) },

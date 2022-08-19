@@ -1,3 +1,6 @@
+use std::fs::File;
+use std::io::{self, BufRead};
+
 #[macro_use] extern crate lalrpop_util;
 #[path = "ast.rs"]
 mod ast;
@@ -7,8 +10,34 @@ mod pretty_print;
 lalrpop_mod!(pub parser); // synthesized by LALRPOP
 
 fn main() {
-    let expr = launch_pretty_print("(f(a) => (1 + 1))");
-    println!("{}", expr);
+    // let expr = launch_pretty_print("(f(a) => (1 + 1))");
+    // println!("{}", expr);
+
+    let result = get_file_content("test/add.lb");
+
+    if let Err(e) = result {
+        println!("{}", e);
+    } else if let Ok(r) = result {
+        println!("{}", r);
+    }
+
+    // println!("{}", content);
+}
+
+fn get_file_content(filename: &str) -> Result<i32, &str> {
+    let file = File::open(filename);
+    if let Err(_) = file {
+        return Err("An error occured on reading the file");
+    }
+    let file_content = io::BufReader::new(file.unwrap()).lines();
+    for line in file_content {
+        if let Ok(l) = line {
+            // println!("{}", l);
+            let res = launch_pretty_print(&l);
+            println!("{}", res);
+        }
+    }
+    Ok(0)
 }
 
 fn _launch_parsing(str: &str, error: bool) -> bool {
@@ -55,6 +84,7 @@ fn launch_pretty_print(str: &str) -> String {
 #[test]
 fn pretty_print() {
     assert_eq!(launch_pretty_print("(9+1)"), "(9 + 1)");
+    assert_eq!(launch_pretty_print("a + b"), "(a + b)");
     assert_eq!(launch_pretty_print("2   *    4"), "(2 * 4)");
     assert_eq!(launch_pretty_print("A = ((4 / 2))"), "A = (4 / 2)");
     assert_eq!(launch_pretty_print("ABC = ((4 / 2) * 23)"), "ABC = ((4 / 2) * 23)");
