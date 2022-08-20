@@ -22,7 +22,7 @@ Fact: Box<Expr> = {
 };
 
 Func: Box<Func> = {
-    <id:ID> => Box::new(Func::ID(ID::Name(id, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))))),
+    "$" <id:ID> => Box::new(Func::ID(ID::Name(id, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))))),
     "(f" "(" <args:Args> ")" "=>" <e:Expr> ")" => Box::new(Func::Decl(*args, e)),
 };
 
@@ -32,20 +32,20 @@ Params: Box<Params> = {
 };
 
 Args: Box<Args> = {
-    <mut p:Args> "," <id:Variable>  => { (*p).args.push(id); p },
-    <id:Var> => Box::new(Args { args: vec![ID::Name(id, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded))))] }),
+    <mut p:Args> "," <id:ID>  => { (*p).args.push(ID::Name(id, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded))))); p },
+    <id:ID> => Box::new(Args { args: vec![ID::Name(id, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded))))] }),
 };
 
-Variable: ID = {
-    <var:Var> => ID::Name(var, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))),
-    ! => { errors.push(<>);
-    ID::Error(Box::new(ErrorType::InnerVar), String::from("Inner variable must
-    be lowercase")) },
-}
+// Variable: ID = {
+//     <var:ID> => ID::Name(var, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))),
+//     ! => { errors.push(<>);
+//     ID::Error(Box::new(ErrorType::InnerVar), String::from("Inner variable must
+//     be lowercase")) },
+// }
 
 Term: Box<Expr> = {
-    <n:Num> => Box::new(Expr::Number(n)),
-    <var:Var> => Box::new(Expr::ID(ID::Name(var, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))))),
+        <n:Num> => Box::new(Expr::Number(n)),
+        <var:ID> => Box::new(Expr::ID(ID::Name(var, Box::new(Expr::Error(Box::new(ErrorType::VariableNotBinded)))))),
     "(" <id:Func> <p:Params> ")" => Box::new(Expr::App(id, *p)),
     "(" <e:Expr> ")" => e,
     ! => { errors.push(<>);
@@ -63,5 +63,4 @@ FactOp: Opcode = {
 };
 
 Num: i32 = <s:r"[0-9]+"> => i32::from_str(s).unwrap();
-ID: String = <s:r"[A-Z][_a-zA-Z]*"> => String::from_str(s).unwrap();
-Var: String = <s:r"[a-z][_a-z]*"> => String::from_str(s).unwrap();
+ID: String = <s:r"[a-zA-Z][_a-zA-Z]*"> => String::from_str(s).unwrap();

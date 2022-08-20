@@ -44,7 +44,7 @@ fn _launch_parsing(str: &str, error: bool) -> bool {
     let mut errors = Vec::new();
     let _ = parser::StatParser::new().parse(&mut errors, str);
 
-    (error && errors.len() != 0) || errors.len() == 0
+    (error && errors.len() != 0) || (!error && errors.len() == 0)
 }
 
 fn _launch_success(str: &str) -> bool {
@@ -73,7 +73,7 @@ fn parse_error() {
     assert!(_launch_error("((2+2)"));
     assert!(_launch_error("A = B = (2+2)"));
     assert!(_launch_error("A = (A 1) = (2+2)"));
-    assert!(_launch_error("A = (f(A) => A)"));
+    assert!(_launch_error("A = (f(A) => A))"));
 }
 
 fn launch_pretty_print(str: &str) -> String {
@@ -89,10 +89,11 @@ fn pretty_print() {
     assert_eq!(launch_pretty_print("A = ((4 / 2))"), "A = (4 / 2)");
     assert_eq!(launch_pretty_print("ABC = ((4 / 2) * 23)"), "ABC = ((4 / 2) * 23)");
     assert_eq!(launch_pretty_print("ABC = (4 / (2 * 23))"), "ABC = (4 / (2 * 23))");
-    assert_eq!(launch_pretty_print("(A 1)"), "(A 1)");
-    assert_eq!(launch_pretty_print("ABC = (A 1)"), "ABC = (A 1)");
-    assert_eq!(launch_pretty_print("ABC = (A 1 2 3 2 1)"), "ABC = (A 1 2 3 2 1)");
+    assert_eq!(launch_pretty_print("($A 1)"), "($A 1)");
+    assert_eq!(launch_pretty_print("ABC = ($A 1)"), "ABC = ($A 1)");
+    assert_eq!(launch_pretty_print("ABC = ($A 1 2 3 2 1)"), "ABC = ($A 1 2 3 2 1)");
     assert_eq!(launch_pretty_print("ABC = 2 + 1 * 4"), "ABC = (2 + (1 * 4))");
     assert_eq!(launch_pretty_print("ABC = (f(a) => 1 + 1)"), "ABC = (f(a) => (1 + 1))");
+    assert_eq!(launch_pretty_print("ABC = (f(a) => (1 + 1))"), "ABC = (f(a) => (1 + 1))");
     assert_eq!(launch_pretty_print("ABC = (f(a) => ((f(b, c) => b + c) a 2))"), "ABC = (f(a) => ((f(b, c) => (b + c)) a 2))");
 }

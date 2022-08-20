@@ -44,8 +44,6 @@ pub enum Opcode {
 #[derive(PartialEq)]
 pub enum ErrorType {
     Success,
-    InnerVar,
-    Outervar,
     Unhandled,
     VariableNotBinded,
 }

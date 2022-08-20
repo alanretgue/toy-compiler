@@ -18,7 +18,7 @@ impl fmt::Debug for Expr {
 impl fmt::Debug for Func {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-        Func::ID(id) => write!(f, "{:?}", id),
+        Func::ID(id) => write!(f, "${:?}", id),
         Func::Decl(args, e) => write!(f, "(f({:?}) => {:?})", args, *e),
         Func::Error(err) => write!(f, "{:?}", *err),
         }
@@ -74,8 +74,6 @@ impl fmt::Debug for ErrorType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
         ErrorType::Success => write!(f, "Success"),
-        ErrorType::InnerVar => write!(f, "Bad name variable"),
-        ErrorType::Outervar => write!(f, "Bad name variable"),
         ErrorType::Unhandled => write!(f, "Unhandled Error"),
         ErrorType::VariableNotBinded => write!(f, "Variable not binded"),
         }
