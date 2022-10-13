@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Error, ErrorKind};
 
 #[macro_use] extern crate lalrpop_util;
 #[path = "ast.rs"]
@@ -9,22 +9,25 @@ mod pretty_print;
 
 lalrpop_mod!(pub parser); // synthesized by LALRPOP
 
-fn main() {
+fn main() -> Result<(), Error> {
     // let expr = launch_pretty_print("(f(a) => (1 + 1))");
     // println!("{}", expr);
 
     let result = get_file_content("test/add.lb");
 
     if let Err(e) = result {
-        println!("{}", e);
-    } else if let Ok(r) = result {
-        println!("{}", r);
+        // println!("{}", e);
+        let err = Error::new(ErrorKind::InvalidInput, e);
+        return Err(err);
+    } else if let Ok(_) = result {
+        // println!("{}", r);
+        return Ok(());
     }
-
     // println!("{}", content);
+    return Ok(());
 }
 
-fn get_file_content(filename: &str) -> Result<i32, &str> {
+fn get_file_content(filename: &str) -> Result<u32, &str> {
     let file = File::open(filename);
     if let Err(_) = file {
         return Err("An error occured on reading the file");
