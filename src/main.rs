@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{self, BufRead, Error, ErrorKind};
+use clap::Parser;
 
 #[macro_use] extern crate lalrpop_util;
 #[path = "ast.rs"]
@@ -8,6 +9,19 @@ mod ast;
 mod pretty_print;
 
 lalrpop_mod!(pub parser); // synthesized by LALRPOP
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+   /// Name of the person to greet
+   #[arg(short, long)]
+   name: String,
+
+   /// Number of times to greet
+   #[arg(short, long, default_value_t = 1)]
+   count: u8,
+}
+
 
 fn main() -> Result<(), Error> {
     // let expr = launch_pretty_print("(f(a) => (1 + 1))");
