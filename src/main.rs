@@ -94,8 +94,12 @@ fn parse_error() {
 }
 
 fn launch_pretty_print(str: &str) -> String {
+    format!("{:?}", launch_parser(&str).unwrap())
+}
+
+fn launch_parser<'input>(str: &'input &str) -> Result<Box<ast::Expr>, lalrpop_util::ParseError<usize, lalrpop_util::lexer::Token<'input>, &'static str>> {
     let mut errors = Vec::new();
-    format!("{:?}", parser::StatParser::new().parse(&mut errors, str).unwrap())
+    parser::StatParser::new().parse(&mut errors, str)
 }
 
 #[test]
