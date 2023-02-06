@@ -15,9 +15,14 @@ impl Binding for ID {
                 } else {
                     hashmap[hashmap.len() - 1].insert(*name, **e);
                 }
-            }
+            },
             ID::Error(err, name) => println!("{:?}: {}", *err, name),
         }
         hashmap
+    }
+}
+
+impl Binding for Params {
+    fn bind(hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>> {
     }
 }
