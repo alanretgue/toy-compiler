@@ -1,29 +1,29 @@
 use std::vec::Vec;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum ID {
     Name(String, Box<Expr>),
     Error(Box<ErrorType>, String)
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Params {
     pub params: Vec<Box<Expr>>,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Args {
     pub args: Vec<ID>,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Func {
     ID(ID),
     Decl(Args, Box<Expr>),
     Error(Box<ErrorType>),
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Expr {
     Number(i32),
     Op(Box<Expr>, Opcode, Box<Expr>),
@@ -33,7 +33,7 @@ pub enum Expr {
     Error(Box<ErrorType>),
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum Opcode {
     Mul,
     Div,
@@ -41,7 +41,7 @@ pub enum Opcode {
     Sub,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum ErrorType {
     Success,
     Unhandled,

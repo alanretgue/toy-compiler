@@ -9,6 +9,8 @@ mod ast;
 mod launchers;
 #[path = "pretty_print.rs"]
 mod pretty_print;
+#[path = "binding.rs"]
+mod binding;
 
 lalrpop_mod!(pub parser); // synthesized by LALRPOP
 
