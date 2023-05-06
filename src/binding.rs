@@ -81,3 +81,9 @@ impl Binding for Expr {
         hashmap.to_vec()
     }
 }
+
+impl Binding for Opcode {
+    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>> {
+        hashmap.to_vec()
+    }
+}
