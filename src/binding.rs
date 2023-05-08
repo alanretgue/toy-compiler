@@ -1,16 +1,16 @@
-use crate::ast::*;
+use crate::{ast, launchers::launch_binding};
 use std::collections::HashMap;
 
-trait Binding {
-    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>>;
+pub trait Binding {
+    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<ast::Expr>>>) -> Vec<HashMap<String, Box<ast::Expr>>>;
 }
 
-impl Binding for ID {
-    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>> {
+impl Binding for ast::ID {
+    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<ast::Expr>>>) -> Vec<HashMap<String, Box<ast::Expr>>> {
         match self {
-            ID::Name(name, e) => {
+            ast::ID::Name(name, e) => {
                 let size = hashmap.len() - 1;
-                if **e == Expr::Error(Box::new(ErrorType::VariableNotBinded)) {
+                if **e == ast::Expr::Error(Box::new(ast::ErrorType::VariableNotBinded)) {
                     if ! hashmap[size].contains_key(name) {
                         println!("A binding error occured on {}", *name);
                     }
@@ -18,20 +18,20 @@ impl Binding for ID {
                     hashmap[size].insert(name.to_string(), e.clone());
                 }
             },
-            ID::Error(err, name) => println!("{:?}: {}", *err, name),
+            ast::ID::Error(err, name) => println!("{:?}: {}", *err, name),
         }
         hashmap.to_vec()
     }
 }
 
-impl Binding for Params {
-    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>> {
+impl Binding for ast::Params {
+    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<ast::Expr>>>) -> Vec<HashMap<String, Box<ast::Expr>>> {
         hashmap.to_vec()
     }
 }
 
-impl Binding for Args {
-    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>> {
+impl Binding for ast::Args {
+    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<ast::Expr>>>) -> Vec<HashMap<String, Box<ast::Expr>>> {
         for id in self.args.iter() {
             *hashmap = id.bind(hashmap);
         }
@@ -39,11 +39,11 @@ impl Binding for Args {
     }
 }
 
-impl Binding for Func {
-    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>> {
+impl Binding for ast::Func {
+    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<ast::Expr>>>) -> Vec<HashMap<String, Box<ast::Expr>>> {
         match self {
-            Func::ID(id) => { *hashmap = id.bind(hashmap); },
-            Func::Decl(args, expr) => {
+            ast::Func::ID(id) => { *hashmap = id.bind(hashmap); },
+            ast::Func::Decl(args, expr) => {
                 match hashmap.last() {
                     None => hashmap.push(HashMap::new()),
                     Some(h) => hashmap.push(h.clone())
@@ -52,38 +52,50 @@ impl Binding for Func {
                 *hashmap = args.bind(hashmap);
                 *hashmap = expr.bind(hashmap);
             },
-            Func::Error(err) => println!("{:?}", *err),
+            ast::Func::Error(err) => println!("{:?}", *err),
         }
         hashmap.to_vec()
     }
 }
 
-impl Binding for Expr {
-    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>> {
+impl Binding for ast::Expr {
+    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<ast::Expr>>>) -> Vec<HashMap<String, Box<ast::Expr>>> {
         match self {
-            Expr::Number(_) => {},
-            Expr::Op(expr1, _, expr2) => {
+            ast::Expr::Number(_) => {},
+            ast::Expr::Op(expr1, _, expr2) => {
                 *hashmap = expr1.bind(hashmap);
                 *hashmap = expr2.bind(hashmap);
             },
-            Expr::App(func, params) => {
+            ast::Expr::App(func, params) => {
                 *hashmap = func.bind(hashmap);
                 *hashmap = params.bind(hashmap);
             },
-            Expr::Func(func) => {
+            ast::Expr::Func(func) => {
                 *hashmap = func.bind(hashmap);
             },
-            Expr::ID(id) => {
+            ast::Expr::ID(id) => {
                 *hashmap = id.bind(hashmap);
             },
-            Expr::Error(err) => println!("{:?}", *err),
+            ast::Expr::Error(err) => println!("{:?}", *err),
         }
         hashmap.to_vec()
     }
 }
 
-impl Binding for Opcode {
-    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<Expr>>>) -> Vec<HashMap<String, Box<Expr>>> {
+impl Binding for ast::Opcode {
+    fn bind(&self, hashmap: &mut Vec<HashMap<String, Box<ast::Expr>>>) -> Vec<HashMap<String, Box<ast::Expr>>> {
         hashmap.to_vec()
     }
+}
+
+#[test]
+fn binding_simple() {
+    // TODO: Add some tests
+    let mut binding_map: Vec<HashMap<String, Box<ast::Expr>>> = Vec::new();
+
+    let line = "1 + 1";
+
+    let result = launch_binding(line, &mut binding_map);
+
+    assert_eq!(result.unwrap().len(), 0);
 }

@@ -1,10 +1,21 @@
+use std::collections::HashMap;
 use std::io::ErrorKind;
 
-use crate::{ast, parser};
+use crate::{ast, parser, binding::Binding};
 
 pub fn launch_pretty_print(str: &str) -> Result<String, (ErrorKind, String)>{
     let parsed = launch_parser(&str)?;
     Ok(format!("{:?}", parsed))
+}
+
+pub fn launch_binding(
+    str: &str,
+    hashmap: &mut Vec<HashMap<String, Box<ast::Expr>>>
+    ) -> Result<Vec<HashMap<String, Box<ast::Expr>>>, (ErrorKind, String)> {
+
+    let parsed = launch_parser(&str)?;
+    
+    Ok((*parsed).bind(hashmap))
 }
 
 pub fn launch_parser(str: &str) -> Result<Box<ast::Expr>, (ErrorKind, String)> {
