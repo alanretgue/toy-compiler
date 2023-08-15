@@ -18,49 +18,49 @@ lalrpop_mod!(pub parser); // synthesized by LALRPOP
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-   /// Name of the person to greet
+   // Flag to execute pretty print
    #[arg(short, long)]
-   name: String,
+   pretty_print: bool,
 
-   /// Number of times to greet
-   #[arg(short, long, default_value_t = 1)]
-   count: u8,
+   // Flag to execute binding
+   #[arg(short, long)]
+   binding: bool,
+
+   // Input file
+   #[arg(short, long)]
+   input: String,
 }
 
 
 fn main() -> Result<(), Error> {
-    // let expr = launch_pretty_print("(f(a) => (1 + 1))");
-    // println!("{}", expr);
+    let cli = Args::parse();
 
-    let result = apply_on_file("test/add.lb", launchers::display_pretty_print);
+    let result = if cli.pretty_print {
+        apply_on_file(&cli.input, launchers::display_pretty_print)
+    } else if cli.binding {
+        apply_on_file(&cli.input, launchers::display_binding)
+    } else {
+        apply_on_file(&cli.input, launchers::display_pretty_print)
+    };
 
     if let Err((error_kind, error_message)) = result {
-        // println!("{}", e);
         let err = Error::new(error_kind, error_message);
         return Err(err);
-    } else if let Ok(_) = result {
-        // println!("{}", r);
+    } else if result.is_ok() {
         return Ok(());
     }
-    // println!("{}", content);
     return Ok(());
 }
 
 fn apply_on_file(filename: &str, f: fn(String) -> Result<u8, (ErrorKind, String)>) -> Result<u8, (ErrorKind, String)> {
     let file = File::open(filename);
-    if let Err(_) = file {
+    if file.is_err() {
         return Err((ErrorKind::InvalidInput, "An error occured on reading the file".to_owned()));
     }
     let file_content = io::BufReader::new(file.unwrap()).lines();
-    for line in file_content {
-        if let Ok(l) = line {
-            // println!("{}", l);
-            let res = f(l);
-            if let Err(e) = res {
-                return Err(e);
-            }
-            println!("{}", res.unwrap());
-        }
+    for line in file_content.flatten() {
+        let res = f(line);
+        println!("{}", (res?));
     }
     Ok(0)
 }
@@ -73,7 +73,7 @@ fn _launch_parsing(str: &str, error: bool) -> bool {
     let mut errors = Vec::new();
     let _ = parser::StatParser::new().parse(&mut errors, str);
 
-    (error && errors.len() != 0) || (!error && errors.len() == 0)
+    (error && !errors.is_empty()) || (!error && errors.is_empty())
 }
 
 fn _launch_success(str: &str) -> bool {

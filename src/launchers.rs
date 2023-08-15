@@ -32,3 +32,9 @@ pub fn display_pretty_print(str: String) -> Result<u8, (ErrorKind, String)> {
     println!("{:?}", launch_pretty_print(&str)?);
     Ok(0)
 }
+
+pub fn display_binding(str: String) -> Result<u8, (ErrorKind, String)> {
+    let mut binding_map: Vec<HashMap<String, Box<ast::Expr>>> = Vec::new();
+    println!("{:?}", launch_binding(&str, &mut binding_map)?);
+    Ok(0)
+}
