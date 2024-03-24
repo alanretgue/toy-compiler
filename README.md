@@ -1,4 +1,4 @@
-# lambda-compiler
+# toy-compiler
 
 ## Overview
 
